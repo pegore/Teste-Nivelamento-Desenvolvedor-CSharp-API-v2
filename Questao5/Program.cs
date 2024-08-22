@@ -1,11 +1,25 @@
+using FluentValidation;
 using MediatR;
+using Questao5.Application.Commands.Requests;
+using Questao5.Application.Handlers;
+using Questao5.Application.Handlers.Interfaces;
+using Questao5.Domain.Repositories.Commands;
+using Questao5.Domain.Repositories.Queries;
+using Questao5.Infrastructure.Database.CommandStore;
+using Questao5.Infrastructure.Database.QueryStore;
+using Questao5.Infrastructure.Services.Base;
 using Questao5.Infrastructure.Sqlite;
 using System.Reflection;
+using System.Text.Json.Serialization;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 
@@ -16,6 +30,16 @@ builder.Services.AddSingleton<IDatabaseBootstrap, DatabaseBootstrap>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CriarMovimentoRequestValidator>();
+
+builder.Services.AddScoped<INotifier, Notifier>();
+builder.Services.AddScoped<IMovimentoCommandRepository, MovimentoCommandRepository>();
+builder.Services.AddScoped<IMovimentoCommandRepository, MovimentoCommandRepository>();
+builder.Services.AddScoped<IMovimentoQueryRepository, MovimentoQueryRepository>();
+builder.Services.AddScoped<IContaCorrenteQueryRepository, ContaCorrenteQueryRepository>();
+builder.Services.AddScoped<IMovimentoService, MovimentoService>();
+builder.Services.AddScoped<ISaldoContaCorrenteService, SaldoContaCorrenteService>();
 
 var app = builder.Build();
 
